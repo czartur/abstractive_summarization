@@ -1,1 +1,1 @@
-# news_title_gen
+# INF582
