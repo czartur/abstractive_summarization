@@ -7,7 +7,7 @@ import nltk
 from nltk.tokenize import sent_tokenize
 from dataclasses import dataclass, fields
 import argparse
-from typing import Union
+from typing import Union, get_origin
 
 nltk.download("punkt")
 rouge_score = load_metric("rouge")
@@ -28,24 +28,34 @@ def dataclass_to_argparse(dc):
     for dc_field in fields(dc):
         field_type = dc_field.type
         field_name = dc_field.name.replace('_', '-')
+        field_default = dc_field.default
         if field_type is bool:
             parser.add_argument(
                 f'--{field_name}',
                 action='store_true',
-                help=f'{field_name} (default: {dc_field.default})'
+                help=f'{field_name} (default: {field_default})'
             )
             parser.add_argument(
                 f'--no-{field_name}',
                 dest=field_name,
                 action='store_false'
             )
-            parser.set_defaults(**{field_name: dc_field.default})
+            parser.set_defaults(**{field_name: field_default})
+        elif get_origin(field_type) == Union:
+            field_types = field_type.__args__
+            type_lambda = lambda x: next((t(x) for t in field_types if isinstance(x, t)), None)
+            parser.add_argument(
+                f'--{field_name}',
+                type=type_lambda,
+                default=field_default,
+                help=f'{field_name} (default: {field_default})'
+            )
         else:
             parser.add_argument(
                 f'--{field_name}',
                 type=field_type,
-                default=dc_field.default,
-                help=f'{field_name} (default: {dc_field.default})'
+                default=field_default,
+                help=f'{field_name} (default: {field_default})'
             )
     return parser
 
@@ -102,8 +112,9 @@ if __name__ == "__main__":
     
     tokenizer = AutoTokenizer.from_pretrained(config.model_name)
     model = AutoModelForSeq2SeqLM.from_pretrained(config.model_name)
+    if config.max_input_length == "model_max_length":
+        config.max_input_length = tokenizer.model_max_length
     tokenized_datasets = prepare_data(tokenizer, config)
-    
     
     num_train_epochs = config.num_train_epochs
     batch_size = config.batch_size
