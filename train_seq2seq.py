@@ -15,7 +15,8 @@ rouge_score = load_metric("rouge")
 @dataclass 
 class Configuration:
     model_name: str
-    data_path: str = "data" 
+    repo_id: str = ""
+    input_dir: str = "data"
     max_target_length: int = 50
     max_input_length: Union[int, str] = "model_max_length"
     num_train_epochs: int = 4
@@ -68,7 +69,7 @@ def prepare_data(tokenizer, config):
     # csv --> pandas --> dataset
     datasets = DatasetDict()
     for split in ["train", "validation"]:
-        datasets[split] = Dataset.from_pandas(pd.read_csv(os.path.join(config.data_path, f"{split}.csv")))
+        datasets[split] = Dataset.from_pandas(pd.read_csv(os.path.join(config.input_dir, f"{split}.csv")))
 
     # tokenize
     def encode(examples):
@@ -119,10 +120,11 @@ if __name__ == "__main__":
     num_train_epochs = config.num_train_epochs
     batch_size = config.batch_size
     logging_steps = len(tokenized_datasets["train"]) // batch_size
-    file_prefix = config.model_name.split("/")[-1]
+    model_name_suffix = config.model_name.split("/")[-1]
+    repo_id = config.repo_id if config.repo_id else model_name_suffix
 
     training_args = Seq2SeqTrainingArguments(
-        output_dir=f"{file_prefix}-dc",
+        output_dir=repo_id,
         evaluation_strategy="epoch",
         learning_rate=config.learning_rate,
         per_device_train_batch_size=batch_size,
