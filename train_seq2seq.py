@@ -16,14 +16,14 @@ rouge_score = load_metric("rouge")
 @dataclass 
 class Configuration:
     model_name: str
-    repo_id: str = ""
     input_dir: str = "data"
-    max_target_length: int = 50
-    max_input_length: Union[int, str] = "model_max_length"
+    repo_id: str = ""
     num_train_epochs: int = 4
     batch_size: int = 8
     learning_rate: float = 5.6e-5
     weight_decay: float = 0.01
+    max_target_length: int = 50
+    max_input_length: Union[int, str] = "model_max_length"
 
 def prepare_data(tokenizer, config):
     # csv --> pandas --> dataset
