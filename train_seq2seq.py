@@ -1,13 +1,14 @@
+import os
+from typing import Union
+from dataclasses import dataclass
+from utils import parse_args_to_dataclass
+
+import numpy as np
+import pandas as pd
 from transformers import AutoModelForSeq2SeqLM, AutoTokenizer, Seq2SeqTrainingArguments, DataCollatorForSeq2Seq, Seq2SeqTrainer
 from datasets import DatasetDict, Dataset, load_metric
-import pandas as pd
-import numpy as np
-import os
-import nltk
 from nltk.tokenize import sent_tokenize
-from dataclasses import dataclass, fields
-import argparse
-from typing import Union, get_origin
+import nltk
 
 nltk.download("punkt")
 rouge_score = load_metric("rouge")
@@ -23,47 +24,6 @@ class Configuration:
     batch_size: int = 8
     learning_rate: float = 5.6e-5
     weight_decay: float = 0.01
-
-def dataclass_to_argparse(dc):
-    parser = argparse.ArgumentParser()
-    for dc_field in fields(dc):
-        field_type = dc_field.type
-        field_name = dc_field.name.replace('_', '-')
-        field_default = dc_field.default
-        if field_type is bool:
-            parser.add_argument(
-                f'--{field_name}',
-                action='store_true',
-                help=f'{field_name} (default: {field_default})'
-            )
-            parser.add_argument(
-                f'--no-{field_name}',
-                dest=field_name,
-                action='store_false'
-            )
-            parser.set_defaults(**{field_name: field_default})
-        elif get_origin(field_type) == Union:
-            field_types = field_type.__args__
-            type_lambda = lambda x: next((t(x) for t in field_types if isinstance(x, t)), None)
-            parser.add_argument(
-                f'--{field_name}',
-                type=type_lambda,
-                default=field_default,
-                help=f'{field_name} (default: {field_default})'
-            )
-        else:
-            parser.add_argument(
-                f'--{field_name}',
-                type=field_type,
-                default=field_default,
-                help=f'{field_name} (default: {field_default})'
-            )
-    return parser
-
-def parse_args_to_dataclass(dc_cls):
-    parser = dataclass_to_argparse(dc_cls)
-    args = parser.parse_args()
-    return dc_cls(**vars(args))
 
 def prepare_data(tokenizer, config):
     # csv --> pandas --> dataset
@@ -89,7 +49,7 @@ def prepare_data(tokenizer, config):
     )
     return tokenized_datasets
 
-def compute_metrics(eval_pred): # from H.F. tutorial
+def compute_metrics(eval_pred): # from HuggingFace tutorial
     predictions, labels = eval_pred
     # Decode generated summaries into text
     decoded_preds = tokenizer.batch_decode(predictions, skip_special_tokens=True)
