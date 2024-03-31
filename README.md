@@ -65,13 +65,15 @@ python3 extsum.py \
 ```
 
 ## Project Structure
+```markdown
 .
-├── data
+├── data                                     # dataset
 │   ├── train.csv
 │   ├── validation.csv
 │   └── test_text.csv
-├── requirements.txt
-├── utils.py 
-├── test_seq2seq.py
-├── train_seq2seq.py
-└── extsum.py
+├── requirements.txt                         # pip required packages
+├── utils.py                                 # utility functions
+├── test_seq2seq.py                          # script for testing a model (generate output)
+├── train_seq2seq.py                         # script for fine tuning a model
+└── extsum.py                                # script for extractive summarize the dataset
+```
