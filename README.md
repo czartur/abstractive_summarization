@@ -48,7 +48,7 @@ python3 test_seq2seq.py \
     --model-name czartur/bart-finetuned \    ## Hugging Face model name
     --test-path data/test_text.csv \         ## Path to the test dataset
     --submission-path "submission.csv" \     ## Path for the output file
-    --device "cuda" \                        ## Device for inference (default: "cuda" if available, else "cpu")
+    --device "cuda"                          ## Device for inference (default: "cuda" if available, else "cpu")
 
 ```
 
@@ -60,8 +60,8 @@ Example usage:
 python3 extsum.py \
     --model-name "paraphrase-MiniLM-L6-v2" \ ## Model name for text summarization
     --input-path "data" \                    ## Path to the input data
-    --output-path "ext_data"                 ## Path for the output extracted summaries
-    --num-sentences None \                   ## Number of sents per doc to extract (if None, model selects auto)
+    --output-path "ext_data" \               ## Path for the output extracted summaries
+    --num-sentences None                     ## Number of sents per doc to extract (if None, model selects auto)
 ```
 
 ## Project Structure
